@@ -20,6 +20,40 @@
           "lookup_file": "The yaml file to use for parameter-definition"
         }
       }
+    },
+    "services": {
+      "write_register": {
+        "name": "Write Single Register",
+        "description": "Write to a single MODBUS register of the inverter",
+        "fields": {
+          "register": {
+            "name": "Register",
+            "description": "Register to write (in decimal)"
+          },
+          "value": {
+            "name": "Value",
+            "description": "Value to write"
+          },
+          "modbus_function": {
+            "name": "Modbus function",
+            "description": "Modbus function"
+          }
+        }
+      },
+      "write_multiple_registers": {
+        "name": "Write multiple registers",
+        "description": "Write 1 or more MODBUS registers to the inverter (function 0x10)",
+        "fields": {
+          "registers": {
+            "name": "Registers",
+            "description": "List of comma-separated register addresses in decimal"
+          },
+          "values": {
+            "name": "Values",
+            "description": "List of comma-separated values, one for each register"
+          }
+        }
+      }
     }
   }
 }

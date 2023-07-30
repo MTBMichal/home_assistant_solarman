@@ -2,6 +2,7 @@ import socket
 import yaml
 import logging
 import struct
+from dataclasses import dataclass
 from homeassistant.util import Throttle
 from datetime import datetime
 from .parser import ParameterParser
@@ -16,6 +17,12 @@ CONTROL_CODE = [0x10, 0x45]
 SERIAL_NO = [0x00, 0x00]
 SEND_DATA_FIELD = [0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 QUERY_RETRY_ATTEMPTS = 6
+
+@dataclass
+class RegisterSegment:
+    start_address: int
+    len: int
+    values: list[int]
 
 class Inverter:
     def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
@@ -68,7 +75,22 @@ class Inverter:
         request_data.extend(length.to_bytes(2, 'big'))
         crc = self.modbus(request_data)
         request_data.extend(crc.to_bytes(2, 'little'))
-        return request_data 
+        return request_data
+
+    def get_business_field_write_multi(self, start_address, values, mb_fc):
+        log.debug(f'get_business_field_write_multi IN start_address: {start_address} values: {values} mb_fc: {mb_fc}')
+        request_data = bytearray([self._mb_slaveid, mb_fc])
+        request_data.extend(start_address.to_bytes(2, 'big'))
+        request_data.extend(len(values).to_bytes(2, 'big'))
+        bytes_values = 2 * len(values)
+        request_data.extend(bytes_values.to_bytes(1, 'big'))
+
+        request_data.extend(bytearray.fromhex("".join(["{:04x}".format(v) for v in values])))
+
+        crc = self.modbus(request_data)
+        request_data.extend(crc.to_bytes(2, 'little'))
+        log.debug(f'get_business_field_write_multi: request data: {request_data.hex()}')
+        return request_data
 
     def generate_packet(self, param1, param2, mb_fc):
         # set the next sequence number to use for building the request
@@ -78,6 +100,34 @@ class Inverter:
         packet_data = []
         packet_data.extend (SEND_DATA_FIELD)
         buisiness_field = self.get_business_field(param1, param2, mb_fc)
+        packet_data.extend(buisiness_field)
+        length = packet_data.__len__()
+        packet.extend(length.to_bytes(2, "little"))
+        packet.extend(CONTROL_CODE)
+        # this next field will be echoed back in the response message
+        packet.extend(struct.pack("<H", self.current_sequence_number)) 
+        packet.extend(self.get_serial_hex())
+        packet.extend(packet_data)
+        #Checksum
+        checksum = 0
+        for i in range(1,len(packet),1):
+            checksum += packet[i]
+        packet.append(checksum & 0xFF)
+        packet.append(END_OF_MESSAGE)
+
+        del packet_data
+        del buisiness_field
+        return packet
+
+    def generate_packet_write_multi(self, reg_start_address, reg_values):
+        # set the next sequence number to use for building the request
+        self.advance_sequence_number()
+        packet = bytearray([START_OF_MESSAGE])
+
+        packet_data = []
+        packet_data.extend (SEND_DATA_FIELD)
+        mb_fc = 0x10
+        buisiness_field = self.get_business_field_write_multi(reg_start_address, reg_values, mb_fc)
         packet_data.extend(buisiness_field)
         length = packet_data.__len__()
         packet.extend(length.to_bytes(2, "little"))
@@ -214,10 +264,10 @@ class Inverter:
                 command = self.generate_packet(register, value, mb_fc)
             else:
                 command = self.generate_packet(register, value, 6)
-            log.debug(command.hex())
+            log.debug(f'Write command: {command.hex()}')
             sock.sendall(command)
             raw_msg = sock.recv(1024)
-            log.debug(raw_msg.hex())
+            log.debug(f'Write response: {raw_msg.hex()}')
             del raw_msg
         except Exception as e:
             log.warning(f"Writing to inverter failed with exception [{type(e).__name__}]")
@@ -226,6 +276,76 @@ class Inverter:
                 del command
             if sock:
                 del sock
+
+    def write_multi_registers(self, registers, values):
+        reg_addresses = [int(x.strip()) for x in registers.split(',')]
+        reg_values = [int(x.strip()) for x in values.split(',')]
+        log.debug(f'write_multi_registers: registers {reg_addresses} values: {reg_values}')
+        if len(reg_addresses) != len(reg_values):
+            raise ValueError("Number of registers and values must match")
+
+        reg_segments = self.make_register_segments(reg_addresses, reg_values)
+
+        sock = None
+        command = None
+        states = [False for rs in reg_segments]
+
+        try:
+            sock = self.connect_to_server()
+
+            for i in range(len(reg_segments)):
+                segment = reg_segments[i]
+                log.debug(f'Writing register segment {i+1} of {len(reg_segments)} at: {segment.start_address} values: {segment.values}')
+                command = self.generate_packet_write_multi(segment.start_address, segment.values)
+                log.debug(f'Write command: {command.hex()}')
+                sock.sendall(command)
+                raw_msg = sock.recv(1024)
+                log.debug(f'Write response: {raw_msg.hex()}')
+                states[i] = self.get_response_status(raw_msg)
+                del raw_msg
+        except Exception as e:
+            log.warning(f"Writing to inverter failed with exception [{type(e).__name__}]")
+        finally:
+            if command:
+                del command
+            if sock:
+                del sock
+
+        for i in range(len(states)):
+            if not states[i]:
+                log.warning(f'Failed write {i+1} of {len(states)}')
+
+    def make_register_segments(self, registers, values):
+        # combine registers and values into a list of tuples
+        # then sort it by the register addresses
+        combined = [(registers[i], values[i]) for i in range(len(registers))]
+        combined.sort(key=lambda tup: tup[0])
+
+        segments = [RegisterSegment(combined[0][0], 1, [combined[0][1]])]
+        for i in range(1, len(combined)):
+            # combined is sorted so we only need to look at the last segment in the list
+            # either we extend the existing segment or we create a new one
+            rs = segments[-1]
+            if combined[i][0] == rs.start_address + rs.len:
+                rs.len = rs.len + 1
+                rs.values.append(combined[i][1])
+                segments[-1] = rs
+            else:
+                rs = RegisterSegment(combined[i][0], 1, [combined[i][1]])
+                segments.append(rs)
+
+        return segments
+
+    def get_response_status(self, response):
+        if len(response) == 29:
+            error_code = response[25]
+            log.warning(f'Received error response with code: {error_code}')
+            return False
+        elif len(response) < 29 + 4:
+            log.warning(f'Response too short')
+            return False
+        else:
+            return True
 
     @Throttle (MIN_TIME_BETWEEN_UPDATES)
     def update (self):
@@ -299,3 +419,7 @@ class Inverter:
     def service_write_register(self, register, value, mb_fc):
         log.warning(f'Write Register : [{register}], value : [{value}], modbus_fc: [{mb_fc}]')
         self.write_register(register, value, mb_fc)
+
+    def service_write_multi_registers(self, registers, values):
+        log.warning(f'Write multiple registers : [{registers}], values : [{values}]')
+        self.write_multi_registers(registers, values)
