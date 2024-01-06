@@ -553,7 +553,25 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      lookup:
+      - key: 0
+        value: "OFF"
+      - key: 1
+        value: "ON"
       registers: [0x0091]
+
+    - name: "Inverter status"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      lookup:
+      - key: 0
+        value: "OFF"
+      - key: 1
+        value: "ON"
+      registers: [0x0050]
 
  - group: Alert
    items: 
