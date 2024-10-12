@@ -12,7 +12,10 @@ requests:
     end: 0x008E
     mb_functioncode: 0x03
   - start: 0x0091
-    end: 0x0091
+    end: 0x0092
+    mb_functioncode: 0x03
+  - start: 0x0094
+    end: 0x00B1
     mb_functioncode: 0x03
   - start: 0x00D2
     end: 0x00DB
@@ -649,6 +652,13 @@ parameters:
       scale: 1
       rule: 1
       registers: [0x0091]
+    - name: "Timetable enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 6
+      registers: [0x0092]
 
     - name: "Inverter status"
       class: ""
@@ -657,6 +667,243 @@ parameters:
       scale: 1
       rule: 1
       registers: [0x0050]
+
+ - group: Timetable
+   items:
+    - name: "Time point 1"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0094]
+      icon: 'mdi:timelapse'
+    - name: "Time point 2"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0095]
+      icon: 'mdi:timelapse'
+    - name: "Time point 3"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0096]
+      icon: 'mdi:timelapse'
+    - name: "Time point 4"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0097]
+      icon: 'mdi:timelapse'
+    - name: "Time point 5"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0098]
+      icon: 'mdi:timelapse'
+    - name: "Time point 6"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 9
+      registers: [0x0099]
+      icon: 'mdi:timelapse'
+    - name: "Time point 1 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009A]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 2 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009B]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 3 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009C]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 4 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009D]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 5 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009E]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 6 Watts"
+      class: ""
+      state_class: ""
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x009F]
+      icon: 'mdi:transmission-tower'
+    - name: "Time point 1 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A0]
+      icon: 'mdi:solar-power'
+    - name: "Time point 2 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A1]
+      icon: 'mdi:solar-power'
+    - name: "Time point 3 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A2]
+      icon: 'mdi:solar-power'
+    - name: "Time point 4 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A3]
+      icon: 'mdi:solar-power'
+    - name: "Time point 5 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A4]
+      icon: 'mdi:solar-power'
+    - name: "Time point 6 Volts"
+      class: ""
+      state_class: ""
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x00A5]
+      icon: 'mdi:solar-power'
+    - name: "Time point 1 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00A6]
+      icon: 'mdi:battery'
+    - name: "Time point 2 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00A7]
+      icon: 'mdi:battery'
+    - name: "Time point 3 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00A8]
+      icon: 'mdi:battery'
+    - name: "Time point 4 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00A9]
+      icon: 'mdi:battery'
+    - name: "Time point 5 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00AA]
+      icon: 'mdi:battery'
+    - name: "Time point 6 SOC"
+      class: ""
+      state_class: ""
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00AB]
+      icon: 'mdi:battery'
+    - name: "Time point 1 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00AC]
+    - name: "Time point 2 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00AD]
+    - name: "Time point 3 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00AE]
+    - name: "Time point 4 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00AF]
+    - name: "Time point 5 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00B0]
+    - name: "Time point 6 charge enable"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00B1]
 
  - group: Alert
    items: 
