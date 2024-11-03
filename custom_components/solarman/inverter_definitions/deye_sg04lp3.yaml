@@ -675,7 +675,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0094]
       icon: 'mdi:timelapse'
     - name: "Time point 2"
@@ -683,7 +683,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0095]
       icon: 'mdi:timelapse'
     - name: "Time point 3"
@@ -691,7 +691,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0096]
       icon: 'mdi:timelapse'
     - name: "Time point 4"
@@ -699,7 +699,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0097]
       icon: 'mdi:timelapse'
     - name: "Time point 5"
@@ -707,7 +707,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0098]
       icon: 'mdi:timelapse'
     - name: "Time point 6"
@@ -715,7 +715,7 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x0099]
       icon: 'mdi:timelapse'
     - name: "Time point 1 Watts"
